@@ -23,7 +23,7 @@
 | Backend | Servlet |
 | Database | MySQL 8.0 |
 | DB 연동 | JDBC |
-| 서버 | Apache Tomcat 10 |
+| 서버 | Apache Tomcat 10.1 |
 | 빌드 | Maven |
 | 버전 관리 | Git / GitHub |
 
