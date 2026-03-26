@@ -294,12 +294,12 @@ Service 레이어에서 UPDATE 후 직접 INSERT해야 합니다.
 ## 📄 관련 문서
 
 ```
-docs/
-├── HR_ERP_DB설계명세서.docx     # 데이터베이스 설계 명세서 v4
-├── HR_ERP_기능설계서.docx       # 기능 설계서 (33개 화면)
+specs/
+├── Database Design Document.pdf     # 데이터베이스 설계 명세서 v4
+├── Functional Specification Document.pdf      # 기능 설계서 (33개 화면)
 └── HR_ERP_화면설계.html         # 화면 설계 (인터랙티브 프로토타입)
 
-sql/
+database/
 ├── hr_erp_schema.sql            # DB 스키마 생성 + 초기 데이터
 └── hr_erp_dummy.sql             # 더미 데이터
 ```
