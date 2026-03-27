@@ -5,53 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HR ERP - 메인 대시보드</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
-
-  :root {
-    --primary: #1a3a6b; --primary-light: #2355a0; --accent: #3b7dd8;
-    --gray-50: #f8fafc; --gray-100: #f1f5f9; --gray-200: #e2e8f0; --gray-500: #64748b; --gray-800: #1e293b;
-    --sidebar-w: 260px; --header-h: 56px;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Noto Sans KR', sans-serif; background: var(--gray-50); color: var(--gray-800); font-size: 13px; display: flex; }
-  a { text-decoration: none; color: inherit; }
-
-  /* ── 사이드바 아코디언 스타일 ── */
-  #sidebar {
-    position: fixed; left: 0; top: 0; width: var(--sidebar-w); height: 100vh;
-    background: var(--primary); overflow-y: auto; z-index: 100;
-  }
-  .nav-logo { padding: 18px 16px; font-size: 16px; font-weight: 700; color: white; border-bottom: 1px solid rgba(255,255,255,.12); }
-  
-  .nav-group { border-bottom: 1px solid rgba(255,255,255,.05); }
-  .nav-group-header {
-    padding: 14px 16px; color: rgba(255,255,255,.85); font-size: 13px; font-weight: 600;
-    cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-    transition: background 0.2s, color 0.2s;
-  }
-  .nav-group-header:hover { background: rgba(255,255,255,.08); color: white; }
-  .nav-group-header::after { content: '▼'; font-size: 10px; transition: transform 0.3s ease; opacity: 0.6; }
-  
-  .nav-group.open .nav-group-header { background: rgba(0,0,0,.1); color: white; }
-  .nav-group.open .nav-group-header::after { transform: rotate(-180deg); opacity: 1; }
-  
-  .nav-group-content { 
-    max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background: rgba(0,0,0,.15);
-  }
-  .nav-item { 
-    display: block; padding: 10px 16px 10px 32px; color: rgba(255,255,255,.65); 
-    font-size: 12px; transition: all .2s; border-left: 3px solid transparent; 
-  }
-  .nav-item:hover { color: white; background: rgba(255,255,255,.05); }
-  .nav-item.active { color: white; border-left-color: var(--accent); background: rgba(255,255,255,.1); font-weight: 500; }
-
-  /* ── 메인 컨테이너 & 헤더 ── */
-  #main-wrapper { margin-left: var(--sidebar-w); width: calc(100% - var(--sidebar-w)); min-height: 100vh; display: flex; flex-direction: column; }
-  .app-header { height: var(--header-h); background: #fff; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; padding: 0 24px; justify-content: space-between; }
-  .app-content { padding: 24px; flex: 1; }
-</style>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
 
@@ -137,28 +91,9 @@
     </main>
   </div>
 
-  <script>
-    // 아코디언 동작 스크립트
-    function toggleAccordion(headerElement) {
-      const group = headerElement.parentElement;
-      const content = group.querySelector('.nav-group-content');
-      
-      // Toggle current
-      if (group.classList.contains('open')) {
-        group.classList.remove('open');
-        content.style.maxHeight = null;
-      } else {
-        group.classList.add('open');
-        content.style.maxHeight = content.scrollHeight + "px";
-      }
-    }
 
-    // 페이지 로드 시 'open' 클래스가 있는 그룹의 max-height 초기화
-    document.addEventListener("DOMContentLoaded", () => {
-      document.querySelectorAll('.nav-group.open .nav-group-content').forEach(content => {
-        content.style.maxHeight = content.scrollHeight + "px";
-      });
-    });
-  </script>
 </body>
+
+<script src="${pageContext.request.contextPath}/js/sidebar.js"></script>
+
 </html>
