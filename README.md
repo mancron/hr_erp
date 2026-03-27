@@ -293,115 +293,299 @@ Service 레이어에서 UPDATE 후 직접 INSERT해야 합니다.
 ## 파일구조 (권장)
 
 ```
-hrms-project/
+hr-erp/
 │
 ├── src/main/java/com/hrms/
+│   ├── common/                          # 공통 기능
+│   │   ├── config/                      # 설정 클래스
+│   │   │   ├── DatabaseConfig.java
+│   │   │   └── AppConfig.java
+│   │   ├── constants/                   # 상수 정의
+│   │   │   ├── AppConstants.java        # 전역 상수
+│   │   │   ├── ErrorMessages.java       # 에러 메시지
+│   │   │   └── ResultCode.java          # 결과 코드
+│   │   ├── exception/                   # 사용자 정의 예외
+│   │   │   ├── ServiceException.java
+│   │   │   ├── DAOException.java
+│   │   │   └── ValidationException.java
+│   │   ├── filter/                      # 서블릿 필터
+│   │   │   ├── AuthenticationFilter.java  # 인증 필터
+│   │   │   ├── XSSFilter.java             # XSS 방어
+│   │   │   └── EncodingFilter.java        # 인코딩 필터
+│   │   ├── security/                    # 보안 관련
+│   │   │   ├── PasswordEncoder.java      # 비밀번호 암호화
+│   │   │   ├── TokenManager.java         # 토큰 관리
+│   │   │   └── SecurityUtil.java
+│   │   ├── util/                        # 유틸리티 클래스
+│   │   │   ├── DateUtil.java
+│   │   │   ├── StringUtil.java
+│   │   │   ├── ValidationUtil.java       # 입력값 검증
+│   │   │   ├── ExcelUtil.java            # Excel 처리
+│   │   │   └── LogUtil.java
+│   │   └── db/                          # 데이터베이스 공통
+│   │       ├── ConnectionPool.java
+│   │       └── GenericDAO.java           # 제네릭 DAO 기반 클래스
 │   │
-│   ├── controller/              ← Servlet (요청 수신 → Service 호출 → JSP 전달)
-│   │   ├── DepartmentController.java
-│   │   ├── EmployeeController.java
-│   │   ├── PayrollController.java
-│   │   ├── AttendanceController.java
-│   │   └── LeaveController.java
+│   ├── auth/                            # 인증 모듈 (AUTH)
+│   │   ├── controller/
+│   │   │   ├── LoginServlet.java         # (AUTH-01) 로그인
+│   │   │   ├── LogoutServlet.java
+│   │   │   └── PasswordChangeServlet.java # (AUTH-02) 비밀번호 변경
+│   │   ├── service/
+│   │   │   ├── AuthService.java
+│   │   │   └── PasswordService.java
+│   │   ├── dao/
+│   │   │   └── AccountDAO.java
+│   │   └── dto/
+│   │       ├── AccountDTO.java
+│   │       ├── LoginRequestDTO.java
+│   │       └── LoginResponseDTO.java
 │   │
-│   ├── service/                 ← 비즈니스 로직 (예외처리, 트랜잭션)
-│   │   ├── DepartmentService.java
-│   │   ├── EmployeeService.java
-│   │   ├── PayrollService.java
-│   │   ├── AttendanceService.java
-│   │   └── LeaveService.java
+│   ├── org/                             # 조직 관리 모듈 (ORG)
+│   │   ├── controller/
+│   │   │   ├── DepartmentServlet.java    # (ORG-01) 부서 관리
+│   │   │   └── PositionServlet.java      # (ORG-02) 직급 관리
+│   │   ├── service/
+│   │   │   ├── DepartmentService.java
+│   │   │   └── PositionService.java
+│   │   ├── dao/
+│   │   │   ├── DepartmentDAO.java
+│   │   │   └── PositionDAO.java
+│   │   └── dto/
+│   │       ├── DepartmentDTO.java
+│   │       └── PositionDTO.java
 │   │
-│   ├── dao/                     ← DB 접근 (CRUD만, PreparedStatement 사용)
-│   │   ├── BaseDAO.java         ← 공통 JDBC 유틸리티
-│   │   ├── DepartmentDAO.java
-│   │   ├── EmployeeDAO.java
-│   │   ├── PayrollDAO.java
-│   │   ├── AttendanceDAO.java
-│   │   └── LeaveDAO.java
+│   ├── emp/                             # 직원 관리 모듈 (EMP)
+│   │   ├── controller/
+│   │   │   ├── EmployeeListServlet.java    # (EMP-01) 직원 목록
+│   │   │   ├── EmployeeDetailServlet.java  # (EMP-02) 직원 상세·수정
+│   │   │   ├── EmployeeRegisterServlet.java # (EMP-03) 직원 등록
+│   │   │   ├── EmployeeResignServlet.java   # (EMP-04) 퇴직 처리
+│   │   │   ├── EmployeeTransferServlet.java # (EMP-05) 인사발령
+│   │   │   ├── EmployeeLeaveServlet.java    # (EMP-06) 휴직 처리
+│   │   │   ├── EmployeeReinstateServlet.java # (EMP-07) 복직 처리
+│   │   │   └── EmployeeHistoryServlet.java  # (EMP-08) 인사발령 이력
+│   │   ├── service/
+│   │   │   ├── EmployeeService.java         # 직원 CRUD
+│   │   │   ├── EmployeeTransferService.java # 인사발령 서비스
+│   │   │   └── EmployeeLeaveService.java    # 휴직/복직 서비스
+│   │   ├── dao/
+│   │   │   ├── EmployeeDAO.java
+│   │   │   ├── EmployeeTransferDAO.java
+│   │   │   └── EmployeeLeaveOfAbsenceDAO.java
+│   │   └── dto/
+│   │       ├── EmployeeDTO.java
+│   │       ├── EmployeeTransferDTO.java
+│   │       └── EmployeeLeaveDTO.java
 │   │
-│   ├── dto/                     ← DTO (데이터 전달용)
-│   │   ├── DepartmentDTO.java
-│   │   ├── EmployeeDTO.java
-│   │   ├── PayrollDTO.java
-│   │   ├── AttendanceDTO.java
-│   │   ├── LeaveDTO.java
-│   │   └── ResponseDTO.java     ← 응답용 공통 DTO
+│   ├── att/                             # 근태 관리 모듈 (ATT)
+│   │   ├── controller/
+│   │   │   ├── AttendanceServlet.java        # (ATT-01) 출퇴근
+│   │   │   ├── LeaveRequestServlet.java      # (ATT-02) 휴가 신청
+│   │   │   ├── LeaveApprovalServlet.java     # (ATT-03) 휴가 승인
+│   │   │   ├── OvertimeServlet.java          # (ATT-04) 초과근무
+│   │   │   ├── AttendanceStatusServlet.java  # (ATT-05) 근태 현황·보정
+│   │   │   ├── AnnualStatusServlet.java      # (ATT-06) 연차 현황
+│   │   │   └── AnnualGrantServlet.java       # (ATT-07) 연차 일괄 부여
+│   │   ├── service/
+│   │   │   ├── AttendanceService.java        # 출퇴근 로직
+│   │   │   ├── LeaveService.java             # 휴가 신청·승인 로직
+│   │   │   ├── OvertimeService.java          # 초과근무 로직
+│   │   │   ├── AnnualLeaveService.java       # 연차 관리 로직
+│   │   │   └── AttendanceCalcService.java    # 근태 계산 로직
+│   │   ├── dao/
+│   │   │   ├── AttendanceDAO.java
+│   │   │   ├── LeaveRequestDAO.java
+│   │   │   ├── OvertimeRequestDAO.java
+│   │   │   └── HolidayDAO.java
+│   │   └── dto/
+│   │       ├── AttendanceDTO.java
+│   │       ├── LeaveRequestDTO.java
+│   │       ├── OvertimeRequestDTO.java
+│   │       └── HolidayDTO.java
 │   │
-│   ├── exception/               ← 사용자정의 예외
-│   │   ├── DAOException.java
-│   │   ├── ServiceException.java
-│   │   └── ValidationException.java
+│   ├── sal/                             # 급여 관리 모듈 (SAL)
+│   │   ├── controller/
+│   │   │   ├── SalaryCalculationServlet.java # (SAL-01) 급여 계산·지급
+│   │   │   ├── SalarySlipServlet.java        # (SAL-02) 급여 명세서
+│   │   │   ├── SalaryStatusServlet.java      # (SAL-03) 급여 현황
+│   │   │   └── DeductionServlet.java         # (SAL-04) 공제율 관리
+│   │   ├── service/
+│   │   │   ├── SalaryService.java            # 급여 CRUD
+│   │   │   ├── SalaryCalculationService.java # 급여 계산 로직
+│   │   │   └── DeductionService.java         # 공제율 관리
+│   │   ├── dao/
+│   │   │   ├── SalaryHistoryDAO.java
+│   │   │   └── SalaryDeductionRuleDAO.java
+│   │   └── dto/
+│   │       ├── SalaryHistoryDTO.java
+│   │       └── SalaryDeductionRuleDTO.java
 │   │
-│   ├── util/
-│   │   ├── DBConnectionPool.java ← 커넥션 풀 관리
-│   │   ├── SecurityUtil.java    ← XSS 방지, 입력검증
-│   │   ├── DateUtil.java
-│   │   ├── Logger.java
-│   │   └── Constants.java
+│   ├── eval/                            # 평가 관리 모듈 (EVAL)
+│   │   ├── controller/
+│   │   │   ├── EvaluationWriteServlet.java   # (EVAL-01) 평가 작성·확정
+│   │   │   └── EvaluationStatusServlet.java  # (EVAL-02) 평가 현황
+│   │   ├── service/
+│   │   │   ├── EvaluationService.java
+│   │   │   └── EvaluationCalcService.java    # 평가점수 계산
+│   │   ├── dao/
+│   │   │   └── EvaluationDAO.java
+│   │   └── dto/
+│   │       └── EvaluationDTO.java
 │   │
-│   └── filter/                  ← 필터 (인증, 인코딩)
-│       ├── AuthFilter.java
-│       └── EncodingFilter.java
+│   └── sys/                             # 시스템 관리 모듈 (SYS)
+│       ├── controller/
+│       │   ├── NotificationServlet.java       # (SYS-01) 알림
+│       │   ├── AccountUnlockServlet.java      # (SYS-02) 계정 잠금 해제
+│       │   ├── HolidayManageServlet.java      # (SYS-03) 공휴일 관리
+│       │   ├── AuditLogServlet.java           # (SYS-04) 변경 이력
+│       │   ├── PasswordResetServlet.java      # (SYS-05) 비밀번호 초기화
+│       │   └── RoleChangeServlet.java         # (SYS-06) 계정 권한 변경
+│       ├── service/
+│       │   ├── NotificationService.java
+│       │   ├── HolidayService.java
+│       │   ├── AuditLogService.java
+│       │   └── RoleService.java
+│       ├── dao/
+│       │   ├── NotificationDAO.java
+│       │   ├── HolidayDAO.java
+│       │   ├── AuditLogDAO.java
+│       │   └── RoleDAO.java
+│       └── dto/
+│           ├── NotificationDTO.java
+│           ├── AuditLogDTO.java
+│           └── RoleDTO.java
 │
 ├── src/main/webapp/
+│   ├── jsp/
+│   │   ├── layout/                      # 레이아웃 JSP
+│   │   │   ├── header.jsp
+│   │   │   ├── sidebar.jsp
+│   │   │   ├── footer.jsp
+│   │   │   └── base-layout.jsp
+│   │   ├── common/                      # 공통 JSP
+│   │   │   ├── error.jsp
+│   │   │   ├── notfound.jsp
+│   │   │   └── loading.jsp
+│   │   │
+│   │   ├── auth/                        # 인증 화면
+│   │   │   ├── auth-login.jsp           # (AUTH-01) 로그인
+│   │   │   └── auth-password-change.jsp # (AUTH-02) 비밀번호 변경
+│   │   │
+│   │   ├── org/                         # 조직 관리 화면
+│   │   │   ├── org-department-list.jsp  # (ORG-01) 부서 관리
+│   │   │   └── org-position-list.jsp    # (ORG-02) 직급 관리
+│   │   │
+│   │   ├── emp/                         # 직원 관리 화면
+│   │   │   ├── emp-list.jsp             # (EMP-01) 직원 목록
+│   │   │   ├── emp-detail.jsp           # (EMP-02) 직원 상세·수정
+│   │   │   ├── emp-register.jsp         # (EMP-03) 직원 등록
+│   │   │   ├── emp-resign.jsp           # (EMP-04) 퇴직 처리
+│   │   │   ├── emp-transfer.jsp         # (EMP-05) 인사발령
+│   │   │   ├── emp-leave.jsp            # (EMP-06) 휴직 처리
+│   │   │   ├── emp-reinstate.jsp        # (EMP-07) 복직 처리
+│   │   │   └── emp-transfer-history.jsp # (EMP-08) 인사발령 이력
+│   │   │
+│   │   ├── att/                         # 근태 관리 화면
+│   │   │   ├── att-attendance.jsp       # (ATT-01) 출퇴근
+│   │   │   ├── att-leave-request.jsp    # (ATT-02) 휴가 신청
+│   │   │   ├── att-leave-approval.jsp   # (ATT-03) 휴가 승인
+│   │   │   ├── att-overtime.jsp         # (ATT-04) 초과근무
+│   │   │   ├── att-status.jsp           # (ATT-05) 근태 현황·보정
+│   │   │   ├── att-annual-status.jsp    # (ATT-06) 연차 현황
+│   │   │   └── att-annual-grant.jsp     # (ATT-07) 연차 일괄 부여
+│   │   │
+│   │   ├── sal/                         # 급여 관리 화면
+│   │   │   ├── sal-calculation.jsp      # (SAL-01) 급여 계산·지급
+│   │   │   ├── sal-slip.jsp             # (SAL-02) 급여 명세서
+│   │   │   ├── sal-status.jsp           # (SAL-03) 급여 현황
+│   │   │   └── sal-deduction.jsp        # (SAL-04) 공제율 관리
+│   │   │
+│   │   ├── eval/                        # 평가 관리 화면
+│   │   │   ├── eval-write.jsp           # (EVAL-01) 평가 작성·확정
+│   │   │   └── eval-status.jsp          # (EVAL-02) 평가 현황
+│   │   │
+│   │   └── sys/                         # 시스템 관리 화면
+│   │       ├── sys-notification.jsp     # (SYS-01) 알림
+│   │       ├── sys-account-unlock.jsp   # (SYS-02) 계정 잠금 해제
+│   │       ├── sys-holiday.jsp          # (SYS-03) 공휴일 관리
+│   │       ├── sys-audit.jsp            # (SYS-04) 변경 이력
+│   │       ├── sys-password-reset.jsp   # (SYS-05) 비밀번호 초기화
+│   │       └── sys-role.jsp             # (SYS-06) 계정 권한 변경
 │   │
-│   ├── WEB-INF/
-│   │   │
-│   │   ├── views/               ← JSP 파일 (JSTL + EL만 사용)
-│   │   │   ├── common/
-│   │   │   │   ├── header.jsp
-│   │   │   │   ├── sidebar.jsp
-│   │   │   │   ├── footer.jsp
-│   │   │   │   └── layout.jsp
-│   │   │   │
-│   │   │   ├── employee/
-│   │   │   │   ├── list.jsp       (목록 조회)
-│   │   │   │   ├── detail.jsp     (상세 조회)
-│   │   │   │   ├── form.jsp       (등록/수정 폼)
-│   │   │   │   └── search.jsp     (검색)
-│   │   │   │
-│   │   │   ├── department/
-│   │   │   │   ├── list.jsp
-│   │   │   │   ├── form.jsp
-│   │   │   │   └── tree.jsp
-│   │   │   │
-│   │   │   ├── payroll/
-│   │   │   │   ├── list.jsp
-│   │   │   │   ├── detail.jsp
-│   │   │   │   └── slip.jsp
-│   │   │   │
-│   │   │   ├── attendance/
-│   │   │   │   ├── list.jsp
-│   │   │   │   └── daily.jsp
-│   │   │   │
-│   │   │   ├── leave/
-│   │   │   │   ├── request.jsp
-│   │   │   │   ├── list.jsp
-│   │   │   │   └── approval.jsp
-│   │   │   │
-│   │   │   └── error/
-│   │   │       ├── 404.jsp
-│   │   │       └── 500.jsp
-│   │   │
-│   │   ├── css/
-│   │   │   ├── common.css
-│   │   │   ├── employee.css
-│   │   │   ├── payroll.css
-│   │   │   └── layout.css
-│   │   │
-│   │   ├── js/
-│   │   │   ├── common.js
-│   │   │   ├── validation.js     ← 클라이언트 검증
-│   │   │   └── ajax.js
-│   │   │
-│   │   └── web.xml              ← 서블릿 매핑
+│   ├── css/
+│   │   ├── common.css                   # 공통 스타일
+│   │   ├── layout.css                   # 레이아웃 스타일
+│   │   ├── form.css                     # 폼 스타일
+│   │   ├── table.css                    # 테이블 스타일
+│   │   └── responsive.css               # 반응형 스타일
 │   │
-│   └── index.jsp                ← 진입점
-│   
+│   ├── js/
+│   │   ├── common.js                    # 공통 자바스크립트
+│   │   ├── validation.js                # 입력값 검증
+│   │   ├── api-client.js                # API 호출
+│   │   ├── datetime-picker.js           # 날짜/시간 선택기
+│   │   └── chart.js                     # 차트 라이브러리
+│   │
+│   ├── images/
+│   │   ├── logo.png
+│   │   ├── icons/
+│   │   └── backgrounds/
+│   │
+│   └── WEB-INF/
+│       ├── web.xml                      # 웹 애플리케이션 설정
+│       ├── lib/                         # 외부 라이브러리
+│       └── classes/                     # 컴파일된 클래스
 │
-└── pom.xml (또는 build.gradle)
+├── sql/
+│   ├── 00_init/
+│   │   ├── hr_erp_schema.sql            # 테이블 생성 (메인)
+│   │   └── hr_erp_dummy.sql             # 더미 데이터
+│   │
+│   ├── 01_auth/
+│   │   └── account.sql
+│   │
+│   ├── 02_org/
+│   │   ├── job_position.sql
+│   │   └── department.sql
+│   │
+│   ├── 03_emp/
+│   │   ├── employee.sql
+│   │   ├── employee_transfer.sql
+│   │   └── employee_leave_of_absence.sql
+│   │
+│   ├── 04_att/
+│   │   ├── attendance.sql
+│   │   ├── leave_request.sql
+│   │   ├── overtime_request.sql
+│   │   └── holiday.sql
+│   │
+│   ├── 05_sal/
+│   │   ├── salary_history.sql
+│   │   └── salary_deduction_rule.sql
+│   │
+│   ├── 06_eval/
+│   │   └── evaluation.sql
+│   │
+│   └── 07_sys/
+│       ├── audit_log.sql
+│       ├── role.sql
+│       └── notification.sql
+│
+├── docs/
+│   ├── 01_프로젝트_개요.md               # 프로젝트 설명
+│   ├── 02_아키텍처.md                   # 아키텍처 가이드
+│   ├── 03_네이밍_규칙.md                # 네이밍 컨벤션
+│   ├── 04_코딩_규칙.md                  # 코딩 스타일 가이드
+│   ├── 05_DB_설계.md                    # 데이터베이스 설계
+│   ├── 06_API_명세.md                   # API 명세서
+│   ├── 07_보안_정책.md                  # 보안 정책
+│   └── 08_배포_가이드.md                # 배포 절차
+│
+├── pom.xml                             # Maven 설정 (또는 build.gradle)
+└── README.md                           # 프로젝트 README
 ```
-
+attendance
 ## 📄 관련 문서
 
 ```
