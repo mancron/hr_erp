@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.util.Vector;
 
 import com.hrms.org.dto.PosDTO;
-import com.hrms.util.DatabaseConnection;
+import com.hrms.common.db.DatabaseConnection;
 
 public class PosDAO {
 

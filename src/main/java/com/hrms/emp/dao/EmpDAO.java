@@ -7,7 +7,7 @@ import java.util.Vector;
 
 import com.hrms.emp.dto.EmpDTO;
 import com.hrms.org.dto.DeptDTO;
-import com.hrms.util.DatabaseConnection;
+import com.hrms.common.db.DatabaseConnection;
 
 public class EmpDAO {
 	
