@@ -1,7 +1,7 @@
 package com.hrms.att.dao;
 
 import com.hrms.att.dto.AttendanceDTO;
-import com.hrms.util.DatabaseConnection;
+import com.hrms.common.db.DatabaseConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

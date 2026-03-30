@@ -108,7 +108,7 @@
 					<td><c:out value="${dto.workHours}" /></td>
 
 					<td><span
-						class="
+						class="status-badge
         <c:choose>
             <c:when test='${dto.status == "결근"}'>status-absent</c:when>
             <c:when test='${dto.status == "지각"}'>status-late</c:when>
