@@ -1,4 +1,4 @@
-package com.hrms.util;
+package com.hrms.common.db;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
