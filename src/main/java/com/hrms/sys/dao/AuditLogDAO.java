@@ -1,7 +1,7 @@
 package com.hrms.sys.dao;
 
+import com.hrms.common.db.DatabaseConnection;
 import com.hrms.sys.dto.AuditLogDTO;
-import com.hrms.util.DatabaseConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
