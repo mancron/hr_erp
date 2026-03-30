@@ -1,0 +1,150 @@
+package com.hrms.emp.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Vector;
+
+import com.hrms.emp.dto.EmpDTO;
+
+public class EmpDAO {
+
+    public EmpDAO() {}
+
+    /**
+     * 필터 조건으로 직원 목록 조회
+     * Connection은 Service에서 받아옵니다 (트랜잭션 관리를 위해).
+     */
+    public Vector<EmpDTO> searchEmpList(Connection con,
+                                        String keyword,
+                                        int deptId,
+                                        int positionId,
+                                        String status) {
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        Vector<EmpDTO> vlist = new Vector<>();
+
+        try {
+            StringBuilder sql = new StringBuilder();
+            sql.append("SELECT e.*, d.dept_name, p.position_name ");
+            sql.append("FROM employee e ");
+            sql.append("LEFT JOIN department d ON e.dept_id = d.dept_id ");
+            sql.append("LEFT JOIN job_position p ON e.position_id = p.position_id ");
+            sql.append("WHERE 1=1 ");
+
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                sql.append("AND (e.emp_name LIKE ? OR e.emp_no LIKE ?) ");
+            }
+            if (deptId > 0) {
+                sql.append("AND e.dept_id = ? ");
+            }
+            if (positionId > 0) {
+                sql.append("AND e.position_id = ? ");
+            }
+            // status가 null이거나 "all"이면 필터 안 함
+            if (status != null && !status.isEmpty() && !status.equals("all")) {
+                sql.append("AND e.status = ? ");
+            }
+
+            sql.append("ORDER BY e.emp_no ASC");
+
+            pstmt = con.prepareStatement(sql.toString());
+
+            int idx = 1;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                pstmt.setString(idx++, "%" + keyword.trim() + "%");
+                pstmt.setString(idx++, "%" + keyword.trim() + "%");
+            }
+            if (deptId > 0) {
+                pstmt.setInt(idx++, deptId);
+            }
+            if (positionId > 0) {
+                pstmt.setInt(idx++, positionId);
+            }
+            if (status != null && !status.isEmpty() && !status.equals("all")) {
+                pstmt.setString(idx++, status);
+            }
+
+            rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                vlist.addElement(mapRow(rs));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+                // ※ Connection은 Service에서 닫습니다. 여기서 닫지 않습니다.
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return vlist;
+    }
+
+    /**
+     * 사번으로 직원 상세 조회
+     */
+    public EmpDTO getEmpDetail(Connection con, String empNo) {
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        EmpDTO dto = null;
+
+        String sql = "SELECT e.*, d.dept_name, p.position_name "
+                   + "FROM employee e "
+                   + "LEFT JOIN department d ON e.dept_id = d.dept_id "
+                   + "LEFT JOIN job_position p ON e.position_id = p.position_id "
+                   + "WHERE e.emp_no = ?";
+
+        try {
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, empNo);
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                dto = mapRow(rs);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return dto;
+    }
+
+    /**
+     * ResultSet → EmpDTO 매핑 (중복 제거용 내부 메서드)
+     */
+    private EmpDTO mapRow(ResultSet rs) throws Exception {
+        EmpDTO dto = new EmpDTO();
+        dto.setEmp_id(rs.getInt("emp_id"));
+        dto.setEmp_name(rs.getString("emp_name"));
+        dto.setEmp_no(rs.getString("emp_no"));
+        dto.setDept_id(rs.getInt("dept_id"));
+        dto.setPosition_id(rs.getInt("position_id"));
+        dto.setHire_date(rs.getString("hire_date"));
+        dto.setResign_date(rs.getString("resign_date"));
+        dto.setEmp_type(rs.getString("emp_type"));
+        dto.setStatus(rs.getString("status"));
+        dto.setBase_salary(rs.getBigDecimal("base_salary"));
+        dto.setBirth_date(rs.getString("birth_date"));
+        dto.setGender(rs.getString("gender"));
+        dto.setAddress(rs.getString("address"));
+        dto.setEmergency_contact(rs.getString("emergency_contact"));
+        dto.setBank_account(rs.getString("bank_account"));
+        dto.setEmail(rs.getString("email"));
+        dto.setPhone(rs.getString("phone"));
+        dto.setCreated_at(rs.getString("created_at"));
+        dto.setDept_name(rs.getString("dept_name"));
+        dto.setPosition_name(rs.getString("position_name"));
+        return dto;
+    }
+}
