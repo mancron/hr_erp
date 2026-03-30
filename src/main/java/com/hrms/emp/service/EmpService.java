@@ -9,60 +9,84 @@ import com.hrms.emp.dto.EmpDTO;
 import com.hrms.common.db.DatabaseConnection;
 
 public class EmpService {
-    
+
     private EmpDAO empDao;
 
     public EmpService() {
-        // 서비스가 생성될 때 DAO도 함께 준비시킵니다.
         empDao = new EmpDAO();
     }
 
-    // 1. 직원 목록 가져오기 서비스
-    public Vector<EmpDTO> getEmployeeList() {
+    /**
+     * 직원 목록 조회 (필터 검색 포함)
+     * Connection을 Service에서 열고 닫습니다.
+     */
+    public Vector<EmpDTO> getEmployeeList(String keyword,
+                                          String deptIdStr,
+                                          String positionIdStr,
+                                          String status) {
         Connection con = null;
-        Vector<EmpDTO> list = null;
-        
+        Vector<EmpDTO> list = new Vector<>();
+
         try {
+            // String → int 변환 (비어있거나 "all"이면 0, 즉 필터 안 함)
+            int deptId = parseId(deptIdStr);
+            int positionId = parseId(positionIdStr);
+
             con = DatabaseConnection.getConnection();
-            // 목록 조회는 단순 SELECT라서 수동 커밋(setAutoCommit)을 생략해도 무방하지만, 
-            // 일관성을 위해 적어주는 것도 좋습니다.
-            
-            // DAO에게 커넥션을 넘겨주며 일을 시킵니다!
-            list = empDao.getEmpList(con); 
-            
+            list = empDao.searchEmpList(con, keyword, deptId, positionId, status);
+
         } catch (Exception e) {
+            System.err.println("[EmpService] getEmployeeList 오류: " + e.getMessage());
             e.printStackTrace();
         } finally {
-            // Service 계층에서 최종적으로 커넥션을 닫아줍니다. (README 필수 사항)
-            try {
-                if (con != null) con.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            closeConnection(con);
         }
+
         return list;
     }
 
-    // 2. 특정 직원 상세 정보 가져오기 서비스
+    /**
+     * 직원 상세 조회
+     */
     public EmpDTO getEmployeeDetail(String empNo) {
         Connection con = null;
-        EmpDTO empDetail = null;
-        
+        EmpDTO dto = null;
+
         try {
             con = DatabaseConnection.getConnection();
-            
-            // 상세 조회 (SELECT)
-            empDetail = empDao.getEmpDetail(con, empNo);
-            
+            dto = empDao.getEmpDetail(con, empNo);
+
         } catch (Exception e) {
+            System.err.println("[EmpService] getEmployeeDetail 오류: " + e.getMessage());
             e.printStackTrace();
         } finally {
+            closeConnection(con);
+        }
+
+        return dto;
+    }
+
+    // ── private 헬퍼 ───────────────────────────────────────────
+
+    /** "all", null, 빈 문자열 → 0 / 그 외 → 정수 변환 */
+    private int parseId(String value) {
+        if (value == null || value.isEmpty() || value.equals("all")) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private void closeConnection(Connection con) {
+        if (con != null) {
             try {
-                if (con != null) con.close();
+                con.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
-        return empDetail;
     }
 }

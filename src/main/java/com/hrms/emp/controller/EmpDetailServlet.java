@@ -11,7 +11,7 @@ import com.hrms.emp.dto.EmpDTO;
 import com.hrms.emp.service.EmpService;
 
 @WebServlet("/emp/detail") 
-public class empDetailServlet extends HttpServlet {
+public class EmpDetailServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
     private EmpService empService = new EmpService();
