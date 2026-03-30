@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>HR ERP - 인사관리 통합 시스템</title>
     <%-- 경로가 꼬이지 않도록 ${pageContext.request.contextPath}를 사용합니다 --%>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/login.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
