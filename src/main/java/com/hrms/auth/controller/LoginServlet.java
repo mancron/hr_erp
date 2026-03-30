@@ -2,6 +2,8 @@ package com.hrms.auth.controller;
 
 import com.hrms.auth.dto.AccountDTO;
 import com.hrms.auth.service.AuthService;
+import com.hrms.emp.dto.EmployeeDTO;
+
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -17,18 +19,33 @@ public class LoginServlet extends HttpServlet {
         String user = request.getParameter("username");
         String pass = request.getParameter("password");
 
-        AccountDTO account = authService.login(user, pass);
+        try {
+            // [수정] authService.login이 이제 Exception을 던집니다.
+            AccountDTO account = authService.login(user, pass);
 
-        if (account != null) {
-            HttpSession session = request.getSession();
-            session.setAttribute("userName", account.getUsername());
-            session.setAttribute("userRole", account.getRole());
+            // 1. 로그인 성공 시 로직
+            if (account != null) {
+                HttpSession session = request.getSession();
+                
+                session.setAttribute("empId", account.getEmpId());
+                session.setAttribute("userName", account.getUsername());
+                session.setAttribute("userRole", account.getRole());
 
-            response.sendRedirect(request.getContextPath() + "/index.jsp");
-        } else {
-            // 실패 시 입력했던 username을 파라미터로 전달 (한글/특수문자 대비 인코딩)
+                // 사원 정보 상세 연동
+                com.hrms.emp.dao.EmployeeDAO empDao = new com.hrms.emp.dao.EmployeeDAO();
+                com.hrms.emp.dto.EmployeeDTO empInfo = empDao.getEmployeeById(account.getEmpId());
+                session.setAttribute("loginUser", empInfo); 
+
+                response.sendRedirect(request.getContextPath() + "/index.jsp");
+            }
+
+        } catch (Exception e) {
+            String errorCode = e.getMessage(); // "locked" 혹은 "login_fail_1"
             String encodedUser = URLEncoder.encode(user, "UTF-8");
-            response.sendRedirect(request.getContextPath() + "/auth/login?error=login_fail&prevUser=" + encodedUser);
+            
+            // [중요] 주소창에 찍히는 실제 경로(/auth/login)로 보내야 합니다. 
+            // 만약 이동 후에도 흰 창이라면 이 경로가 실제 로그인 폼 주소인지 확인하세요.
+            response.sendRedirect(request.getContextPath() + "/auth/login?msg=" + errorCode + "&prevUser=" + encodedUser);
         }
     }
 }
